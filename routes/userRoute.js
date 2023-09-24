@@ -34,11 +34,11 @@ router.put('/verify/:token', verifyEmail) // checked
 router.put('/re-verify', resendEmailVerification) // checked
 router.post('/login', logIn) //checked
 router.put('/logout/:id',  userAuth, signOut) // checked
-router.put('/changepassword/:id', userAuth,changePassword) // checked
+router.put('/changepassword', userAuth,changePassword) // checked
 router.post('/changepassword/:id/:token',passwordMiddleware, resetPassword) // checked
 router.post('/forgotpassword', forgotPassword) // checked
 router.put(
-    "/add-profile-image/:id",
+    "/add-profile-image",
     userAuth,
     addProfilePicture
   );    

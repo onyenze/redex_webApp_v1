@@ -5,6 +5,7 @@ const validateUser = (req, res, next) => {
   const schema = Joi.object({
     firstname: Joi.string()
       .regex(/^[A-Za-z]+$/)
+      .trim()
       .empty()
       .messages({
         "string.base": "Please provide a valid first name.",
@@ -13,11 +14,20 @@ const validateUser = (req, res, next) => {
       }),
     lastname: Joi.string()
       .regex(/^[A-Za-z]+$/)
+      .trim()
       .empty()
       .messages({
         "string.base": "Please provide a valid last name.",
         "string.empty": "Last name cannot be empty.",
         "string.regex.base": "Last name should only contain letters.",
+      }),
+      phoneNumber: Joi.string()
+      .regex(/^\d{11}$/) // Validates exactly 11 numeric digits
+      .required()
+      .messages({
+        "string.base": "Please provide a phone number.",
+        "string.empty": "Please provide a phone number.",
+        "string.pattern.base": "Phone number should be exactly 11 digits with no spaces.",
       }),
   });
 

@@ -31,7 +31,6 @@ const registration = async (req, res)=>{
             const data = {
                 firstname,
                 lastname,
-                DOB,
                 phoneNumber,
                 email: email.toLowerCase(),
                 password: hashPassword
@@ -41,13 +40,13 @@ const registration = async (req, res)=>{
             const LinkToken =  jwt.sign({user}, process.env.JWT_SECRET, {expiresIn: "30m"});
             const subject = 'Kindly Verify'
             const link = `https://creativentstca.onrender.com/#/api/verify?token=${LinkToken}`
-            const message = `Welcome on board Creativents, kindly use this link ${link} to verify your account. Kindly note that this link will expire after 30 Minutes.`
+            const text = `Welcome on board Creativents, kindly use this link ${link} to verify your account. Kindly note that this link will expire after 30 Minutes.`
 
             // html = generateDynamicEmail(link, user.firstname)
             sendEmail({
                 email: savedUser.email,
                 subject,
-                message
+                text
             });
             if (!savedUser) {
                 res.status(400).json({
@@ -247,7 +246,7 @@ const genToken = async(user,time)=>{
 const changePassword = async(req, res)=>{
     try {
         const { password } = req.body;
-        const { id } = req.params;
+        const { id } = req.userId;
         const userpassword = await userModel.findById(id);
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);
@@ -361,12 +360,9 @@ const getUserProfile = async (req,res) => {
 // update profile
 const addProfilePicture = async (req, res) => {
     try {
-      const profile = await userModel.findById(req.params.id);
+      const profile = await userModel.findById(req.userId);
       if (profile) {
-        console.log(profile)
-        //console.log(req.file);
         let result = null;
-        console.log(req.files)
         // Delete the existing image from local upload folder and Cloudinary
         if (req.files) {
           if (profile.profilePicture) {

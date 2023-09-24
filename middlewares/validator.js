@@ -5,6 +5,7 @@ const validationMiddleware = (req, res, next) => {
   const schema = Joi.object({
     firstname: Joi.string()
       .regex(/^[A-Za-z]+$/)
+      .trim()
       .required()
       .messages({
         "string.base": "Please provide your first name.",
@@ -13,13 +14,14 @@ const validationMiddleware = (req, res, next) => {
       }),
     lastname: Joi.string()
       .regex(/^[A-Za-z]+$/)
+      .trim()
       .required()
       .messages({
         "string.base": "Please provide your last name.",
         "string.empty": "Please provide your last name.",
         "string.regex.base": "Last name should only contain letters.",
       }),
-    email: Joi.string().email().required().messages({
+    email: Joi.string().email().trim().required().messages({
       "string.base": "Please provide your email address.",
       "string.email": "Please provide a valid email address.",
       "string.empty": "Please provide your email address.",
@@ -40,6 +42,15 @@ const validationMiddleware = (req, res, next) => {
         "any.only": "Passwords do not match.",
         "string.empty": "Please confirm your password.",
       }), // Must match the 'password' field, and it's required
+      phoneNumber: Joi.string()
+      .regex(/^\d{10}$/) // Validates exactly 11 numeric digits
+      .required()
+      .trim()
+      .messages({
+        "string.base": "Please provide a phone number.",
+        "string.empty": "Please provide a phone number.",
+        "string.pattern.base": "Phone number should be exactly 11 digits with no spaces.",
+      }),
   });
 
   // Validate the request body against the schema
