@@ -5,7 +5,7 @@ const DBpassword = process.env.DB_PASSWORD
 const DBusername = process.env.DB_USERNAME
 
 
-const db = `mongodb+srv://${DBusername}:${DBpassword}@cluster0.u5pysot.mongodb.net/`
+const db = `mongodb+srv://${DBusername}:${DBpassword}@cluster0.qiqlcnu.mongodb.net/`
 
 
 mongoose.connect(db).then(()=>{

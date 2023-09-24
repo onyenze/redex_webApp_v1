@@ -9,8 +9,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'LastName is Required']
     },
-    username: {
-        type: String
+    phoneNumber: {
+        type: Number
     },
     email: {
         type: String,
@@ -21,20 +21,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is Required']
     },
-    DOB: {
-        type:String
-    },
     token: {
-        type: String
+        type: String,
+        select:false
     },
     profilePicture:{
         type:String
     },
     isVerified: {
-        type: Boolean,
-        default: false
-    },
-    isPremium: {
         type: Boolean,
         default: false
     },
@@ -50,36 +44,6 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    totalTicketsSold:{
-        type:Number,
-        default: 0,
-        min: 0
-    },
-    Earnings:{
-        type:Number,
-        default: 0,
-        min: 0
-    },
-    following: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User' 
-    }],
-    followers: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User' 
-    }],
-    bookmarks: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'event' 
-    }],
-    myEventsLink: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"event"
-    }],
-    myticketsLink: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"ticket"
-    }],
 }, {timestamps: true});
 
 const userModel = mongoose.model('User', userSchema);

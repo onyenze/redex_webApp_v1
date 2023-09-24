@@ -12,13 +12,19 @@ const {generatePasswordEmail} = require("../utilities/sendingmail/changepassword
 // REGISTER USER 
 const registration = async (req, res)=>{
     try {
-        const { firstname,lastname, username,email, password,DOB } = req.body;
+        const { firstname,lastname, phoneNumber,email, password } = req.body;
         const isEmail = await userModel.findOne({email});
+        const isPhoneNumber = await userModel.findOne({phoneNumber})
         if (isEmail) {
             res.status(400).json({
                 message: `User with this Email: ${email} already exist.`
             })
-        } else {
+        } else if (isPhoneNumber){
+            res.status(400).json({
+                message:`User with this Phone Number :${phoneNumber},already exists`
+            })
+        }
+         else {
             const salt = await bcrypt.genSalt(10);
             const hashPassword = await bcrypt.hash( password, salt )
             
@@ -26,26 +32,22 @@ const registration = async (req, res)=>{
                 firstname,
                 lastname,
                 DOB,
-                username,
+                phoneNumber,
                 email: email.toLowerCase(),
                 password: hashPassword
             };
             const user = new userModel(data);
-            // const usertoken = await jwt.sign({user}, process.env.JWT_SECRET, {expiresIn: '1d'});
-            // user.token = usertoken
             const savedUser = await user.save();
-            const LinkToken = await jwt.sign({user}, process.env.JWT_SECRET, {expiresIn: "30m"});
+            const LinkToken =  jwt.sign({user}, process.env.JWT_SECRET, {expiresIn: "30m"});
             const subject = 'Kindly Verify'
             const link = `https://creativentstca.onrender.com/#/api/verify?token=${LinkToken}`
-            //  const oglink = `https://creativents.onrender.com/verify/${savedUser._id}/${LinkToken}`
-            // const oldlink = `${req.protocol}://${req.get('host')}/api/verify/${savedUser._id}/${LinkToken}`
             const message = `Welcome on board Creativents, kindly use this link ${link} to verify your account. Kindly note that this link will expire after 30 Minutes.`
 
-            html = generateDynamicEmail(link, user.firstname)
+            // html = generateDynamicEmail(link, user.firstname)
             sendEmail({
                 email: savedUser.email,
                 subject,
-                html
+                message
             });
             if (!savedUser) {
                 res.status(400).json({
@@ -55,7 +57,6 @@ const registration = async (req, res)=>{
                 res.status(201).json({
                     message: 'Successfully created account',
                     data: savedUser,
-                    expireLink:LinkToken
                 });
             }
         }
@@ -94,10 +95,6 @@ const verifyEmail = async (req, res) => {
         return res.status(404).json({ message: 'User is not verified yet' });
       }
   
-      // Update the user's verification status
-    //   user.isVerified = true;
-    //   await user.save();
-  
       res.status(200).json({ message: `User with Email: ${user.email} verified successfully` });
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -124,11 +121,11 @@ const resendEmailVerification = async(req, res)=>{
                         const subject = 'Kindly RE-VERIFY'
                         const link = `https://creativentstca.onrender.com/#/api/verify?token=${token}`
                         const message = `Welcome onBoard, kindly use this link ${link} to re-verify your account. Kindly note that this link will expire after 5(five) Minutes.`
-                        html = generateDynamicEmail(link, user.firstname)
+                        // html = generateDynamicEmail(link, user.firstname)
                         sendEmail({
                             email: user.email,
                             subject,
-                            html
+                            message
                         });
                         res.status(200).json({
                             message: `Verification email sent successfully to your email: ${user.email}`
@@ -147,8 +144,26 @@ const resendEmailVerification = async(req, res)=>{
 
 const logIn = async(req, res)=>{
     try {
-        const { email, password } = req.body;
-        const user = await userModel.findOne({email});
+        const { email,phoneNumber, password } = req.body;
+
+
+        // Check if either email or phoneNumber is provided
+        if (!email && !phoneNumber) {
+            return res.status(400).json({
+                message: 'Please provide either email or phoneNumber'
+            });
+        }
+
+        // Define a query object to find the user
+        let query;
+        if (email) {
+            query = { email };
+        } else {
+            query = { phoneNumber };
+        }
+
+
+        const user = await userModel.findOne({query});
         if (!user) {
           return  res.status(404).json({
                 message: 'User not found'
@@ -168,7 +183,7 @@ const logIn = async(req, res)=>{
                 const isPassword = await bcrypt.compare(password, user.password);
                 if(!isPassword) {
                     res.status(400).json({
-                        message: 'Incorrect Password'
+                        message: 'Email or passward incorrect'
                     });
                 } else {
                     const userLogin = await userModel.findByIdAndUpdate(user._id, {islogin: true});
@@ -271,11 +286,11 @@ const forgotPassword = async (req, res)=>{
             const subject = 'Link for Reset password'
             const link = `https://creativentstca.onrender.com/#/api/changepassword/${isEmail._id}/${token}`
             const message = `Forgot your Password? it's okay, kindly use this link ${link} to re-set your account password. Kindly note that this link will expire after 5(five) Minutes.`
-            const html = generatePasswordEmail(link)
+            // const html = generatePasswordEmail(link)
             sendEmail({
                 email,
                 subject,
-                html
+                message
             });
             res.status(200).json({
                 message: 'Email sent successfully, please check your Email for the link to reset your Password'
@@ -326,6 +341,20 @@ const resetPassword = async (req, res) => {
         })
     }
 }
+
+
+const getUserProfile = async (req,res) => {
+    try {
+      const userID = req.userId
+      const user = await userModel.findById(userID)
+        
+  
+        res.status(200).json({ data: user });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user with linked fields: ' + error.message })
+    }
+  };
+
 
 
 //add profile picture
@@ -388,10 +417,10 @@ const addProfilePicture = async (req, res) => {
 // Updating a User.
 const updateUsers = async (req, res)=>{
     try {
-        const { username, email, firstname, lastname } = req.body;
+        const { phoneNumber, email, firstname, lastname } = req.body;
         const user = await userModel.findById(req.userId);
             const data = {
-                username: username || user.username,
+                phoneNumber: phoneNumber || user.phoneNumber,
                 email: email || user.email,
                 firstname:firstname || user.firstname, 
                 lastname:lastname || user.lastname
@@ -416,92 +445,6 @@ const updateUsers = async (req, res)=>{
 }
 
 
-const followUser = async (req, res) => {
-    const {followId} = req.params;
-  
-    try {
-      // User is authenticated, continue with event creation
-      
-      const user = await userModel.findById(req.userId).exec()
-      // Check if the user is authenticated
-      if (!user) {
-        return res.status(401).json({ message: 'User not authenticated. Please log in or sign up to follow a user.' });
-      }
-  
-      // Find the user to follow by its ID
-      const followedUser = await userModel.findById(followId);
-      if (!followedUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      
-      //Check if a user is trying to follow themself
-      if (followId === req.userId) {
-        return res.status(400).json({ message: 'You cannot follow yourself' });
-      }
-
-      // Check if the user is already following the other user
-      if (user.following.includes(followId)) {
-        return res.status(400).json({ message: 'You are already following this User' });
-      }
-  
-      // Add the user ID to the user's following array
-      user.following.unshift(followId);
-
-    //   Add the follower's ID to the followers array
-    followedUser.followers.unshift(req.userId)
-      // Save the updated users
-      await user.save();
-      await followedUser.save()
-
-      res.status(200).json({ message: 'User has been Successfully Followed' });
-    } catch (error) {
-      res.status(500).json({ message: 'Error following this User', error: error.message });
-    }
-  };
-  
-  const unfollowUser = async (req, res) => {
-    const { unfollowId } = req.params;
-  
-    try {
-      // User is authenticated, continue with unfollowing
-      
-      const user = await userModel.findById(req.userId).exec()
-      // Check if the user is authenticated
-      if (!user) {
-        return res.status(401).json({ message: 'User not authenticated. Please log in or sign up.' });
-      }
-  
-      // Find the user by its ID
-      const unfollowedUser = await userModel.findById(unfollowId);
-      if (!unfollowedUser) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-      
-      //Check if a user is trying to follow themself
-      if (unfollowId === req.userId) {
-        return res.status(400).json({ message: 'You cannot follow yourself' });
-      }
-
-      // Check if the user is following the unfollowedUser
-      if (!user.following.includes(unfollowId)) {
-        return res.status(400).json({ message: 'You are not following this user' });
-      }
-      
-      // Remove the user ID from the user's following array
-      const stringArray1 = user.following.map(objectId => objectId.toString());
-        user.following = stringArray1.filter(followingId => followingId !== unfollowId);
-
-        const stringArray2 = unfollowedUser.followers.map(objectId => objectId.toString());
-        unfollowedUser.followers = stringArray2.filter(followersId => followersId !== req.userId)
-      // Save the updated user
-      await user.save();
-      await unfollowedUser.save();
-
-      res.status(200).json({ message: 'User has been Successfully UnFollowed' });
-    } catch (error) {
-      res.status(500).json({ message: 'Error unfollowing this User', error: error.message });
-    }
-  };
 
 
 
@@ -650,27 +593,6 @@ const makeSuperAdmin = async (req, res)=>{
 
 
 
-const getUserProfile = async (req,res) => {
-    try {
-      const userId = req.params.id
-      const user = await userModel.findById(userId)
-        .populate('bookmarks')
-        .populate('myEventsLink')
-        .populate('following')
-        .populate('followers')
-        .populate({
-          path: 'myticketsLink',
-          populate: {
-            path: 'link', // to populate a field in a field
-            model: 'event' // the model of the field to populate
-          }
-        });
-  
-        res.status(200).json({ data: user });
-    } catch (error) {
-      throw new Error('Error fetching user with linked fields: ' + error.message);
-    }
-  };
 
 
 
@@ -690,8 +612,6 @@ module.exports = {
     resetPassword,
     updateUsers,
     addProfilePicture,
-    followUser,
-    unfollowUser,
     getUserProfile,
     createAdmin,
     allAdminUsers,

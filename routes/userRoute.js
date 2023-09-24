@@ -8,10 +8,6 @@ const {
     forgotPassword,
     resetPassword,
     updateUsers,
-    deleteUser,
-    followUser,
-    unfollowUser,
-    getUserProfile,
     addProfilePicture,
     createAdmin,
     allAdminUsers,
@@ -48,14 +44,6 @@ router.put(
   );    
 router.put('/updateuser',  userAuth, validateUser,updateUsers) // checked
 
-// Route to follow a User
-router.put('/users/follow/:followId', userAuth,followUser);
-
-// Route to unfollow a User
-router.put('/users/unfollow/:unfollowId', userAuth,unfollowUser);
-
-// GET request to get all event reviews
-router.get('/getUserProfile/:id',getUserProfile);
 
 // Major Routes for SUPER ADMIN routes
 

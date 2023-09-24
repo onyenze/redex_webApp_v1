@@ -4,7 +4,7 @@ const morgan = require("morgan");
 
 const fileUpload = require("express-fileupload")
 const express = require('express');
-PORT = process.env.PORT || 2221
+PORT = process.env.PORT || 2020
 const app = express();
 
 
@@ -15,11 +15,6 @@ app.use(morgan("dev"));
 
 
 const router = require('./routes/userRoute');
-const admin = require('./routes/adminRoute');
-const event = require('./routes/eventRoute');
-const ticket = require('./routes/ticketRoute');
-const analysis = require('./routes/analysisRoute');
-const report = require('./routes/reportRoute');
 app.use(express.json());
 
 
@@ -30,11 +25,6 @@ app.use(fileUpload({
 
 
 app.use('/api', router);
-app.use('/api', admin);
-app.use('/api', event);
-app.use('/api', ticket);
-app.use('/api', analysis);
-app.use('/api', report);
 
 
 app.get('/', (req, res)=>{

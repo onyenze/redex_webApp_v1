@@ -23,10 +23,13 @@ const sendEmail = async (options) => {
   async function main() {
     // send mail with defined transport object
     const info = await transporter.sendMail({
-      from: process.env.user,
+      from: {
+        name:"Book Redex ",
+        address:process.env.user
+      },
       to: options.email,
       subject: options.subject,
-      html: options.html,
+      text: options.text,
     });
 
     console.log("Message sent: %s", info.messageId);
