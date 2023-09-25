@@ -39,7 +39,7 @@ const registration = async (req, res)=>{
             const savedUser = await user.save();
             const LinkToken =  jwt.sign({user}, process.env.JWT_SECRET, {expiresIn: "30m"});
             const subject = 'Kindly Verify'
-            const link = `https://creativentstca.onrender.com/#/api/verify?token=${LinkToken}`
+            const link = `localhost:5174/api/verify?token=${LinkToken}`
             const text = `Welcome on board Creativents, kindly use this link ${link} to verify your account. Kindly note that this link will expire after 30 Minutes.`
 
             // html = generateDynamicEmail(link, user.firstname)
@@ -118,7 +118,7 @@ const resendEmailVerification = async(req, res)=>{
                 } else {   
                     
                         const subject = 'Kindly RE-VERIFY'
-                        const link = `https://creativentstca.onrender.com/#/api/verify?token=${token}`
+                        const link = `localhost:5174/api/verify?token=${token}`
                         const message = `Welcome onBoard, kindly use this link ${link} to re-verify your account. Kindly note that this link will expire after 5(five) Minutes.`
                         // html = generateDynamicEmail(link, user.firstname)
                         sendEmail({
@@ -283,7 +283,7 @@ const forgotPassword = async (req, res)=>{
                 id:isEmail.id
             }, process.env.JWT_SECRET, {expiresIn: '5m'})
             const subject = 'Link for Reset password'
-            const link = `https://creativentstca.onrender.com/#/api/changepassword/${isEmail._id}/${token}`
+            const link = `localhost:5174/api/changepassword/${isEmail._id}/${token}`
             const message = `Forgot your Password? it's okay, kindly use this link ${link} to re-set your account password. Kindly note that this link will expire after 5(five) Minutes.`
             // const html = generatePasswordEmail(link)
             sendEmail({
