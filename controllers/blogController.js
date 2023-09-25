@@ -181,7 +181,7 @@ const deleteBlogPost = async (req, res) => {
       // Delete the blog post document from your database
       await blogModel.findByIdAndDelete(postId)
   
-      res.status(204).send(); // Respond with a 204 status (no content) for a successful deletion
+      res.status(200).json({message : "Deleted successfully"}); // Respond with a 204 status (no content) for a successful deletion
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: error.message });
