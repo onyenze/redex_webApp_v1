@@ -519,79 +519,25 @@ const allAdminUsers = async (req, res)=>{
 
 
 
-
-// Upgrade a User to an Admin.
-const makeAdmin = async (req, res)=>{
+const allUsers = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const userInfo = await userModel.findById(userId);
-        if (!userInfo) {
+        const users = await userModel.find()
+        if (users.length == 0) {
             res.status(404).json({
-                message: 'User does not Exist'
+                message: ' No User not found'
             })
         } else {
-            const user = await userModel.findByIdAndUpdate(userId, {isAdmin: true});
-            const subject = `Congratulation Admin ${userInfo.username}`
-            const message = `Welcome onBoard, You are an Admin for this Product. You now have access rights of an Admin.`
-            sendEmail({
-                email: userInfo.email,
-                subject,
-                message
-            });
             res.status(200).json({
-                message: `Congratulations, ${userInfo.username} is now an Admin of this Product.`
-            })
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
-};
-
-
-
-
-// Upgrade an Admin to a Super Admin.
-const makeSuperAdmin = async (req, res)=>{
-    try {
-        const { userId } = req.params;
-        const userInfo = await userModel.findById(userId);
-        if (!userInfo) {
-            res.status(404).json({
-                message: 'User does not Exist'
-            })
-        } else {
-            const user = await userModel.findByIdAndUpdate(userId, {isSuperAdmin: true});
-            const subject = `Congratulation Super Admin ${userInfo.username}`
-            const message = `Welcome onBoard, You are a Super Admin for this Product. You now have access rights of a Super Admin.`
-            sendEmail({
-                email: userInfo.email,
-                subject,
-                message
+                message: 'All Users found',
+                data: users
             });
-            if (!user) {
-                res.status(400).json({
-                    message: 'Could not make Super Admin'
-                })
-            } else {
-                res.status(200).json({
-                    message: `Congratulations, ${userInfo.username} is now a Super Admin of this Product.`
-                })
-            }
         }
     } catch (error) {
         res.status(500).json({
             message: error.message
         })
     }
-};
-
-
-
-
-
-
+  };
 
 
 
@@ -611,7 +557,6 @@ module.exports = {
     getUserProfile,
     createAdmin,
     allAdminUsers,
-    makeAdmin,
-    makeSuperAdmin
+    allUsers,
 };
 // e choke
