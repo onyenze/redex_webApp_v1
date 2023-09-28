@@ -154,15 +154,14 @@ const logIn = async(req, res)=>{
         }
 
         // Define a query object to find the user
-        let query;
-        if (email) {
-            query = { email };
+        let query ;
+        if (!email) {
+            query = {phoneNumber} ;
         } else {
-            query = { phoneNumber };
+            query =  {email};
         }
 
-
-        const user = await userModel.findOne({query});
+        const user = await userModel.findOne(query);
         if (!user) {
           return  res.status(404).json({
                 message: 'User not found'

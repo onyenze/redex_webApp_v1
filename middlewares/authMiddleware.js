@@ -28,7 +28,7 @@ const userAuth = (req, res, next)=>{
 };
 
 
-
+// create a middleware just to retrieve a users email or ID so that you can save their cart 
 
 
 const authenticator = async (req, res,next)=>{
