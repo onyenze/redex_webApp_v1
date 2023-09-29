@@ -29,7 +29,29 @@ const userAuth = (req, res, next)=>{
 
 
 // create a middleware just to retrieve a users email or ID so that you can save their cart 
-
+// auth Middleware
+const emailAuth = (req, res, next)=>{
+    const hasEmail = req.headers.authorization;
+    if(!hasEmail) {
+        next()
+    } else {
+        const token = hasEmail.split(' ')[1];
+        try {
+            // console.log(req.headers)
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = JSON.stringify(decodedToken);
+            req.userId = decodedToken.userId;
+            req.userEmail = decodedToken.email;
+            req.username = decodedToken.username;
+            next()
+        } catch (error) {
+            res.status(500).json({
+                message: error.message,
+                message2:"Please login"
+            })
+        }
+    }
+};
 
 const authenticator = async (req, res,next)=>{
     

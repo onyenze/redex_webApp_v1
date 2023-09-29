@@ -17,6 +17,7 @@ app.use(morgan("dev"));
 const router = require('./routes/userRoute');
 const blog = require('./routes/blogRoute');
 const product = require("./routes/inventoryRoute")
+const cart = require("./routes/cartRoute")
 app.use(express.json());
 
 
@@ -29,6 +30,7 @@ app.use(fileUpload({
 app.use('/api', router);
 app.use('/api', blog);
 app.use("/api", product)
+app.use("/api", cart)
 
 
 app.get('/', (req, res)=>{
