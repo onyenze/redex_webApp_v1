@@ -42,16 +42,27 @@ newCart.totalPrice += cartItem.totalPrice;
 
 
 else {
-    
-cart.items.push(cartItem);
-cart.totalQuantity += quantity;
-cart.totalPrice += cartItem.totalPrice;
-user.cart = cart
-await cart.save();
+    const updateItem = cart.items.findIndex((product)=>product.toString())
+    if (updateItem){
+        cart.items[updateItem].quantity += 1
+        cart.items[updateItem].totalPrice =  quantity * product.productPrice
+        
+        cart.totalQuantity += 1;
+        cart.totalPrice += cart.items[updateItem].totalPrice;
+        user.cart = cart
+        // await cart.save();
+        // await user.save()
+
+    }
+    cart.items.push(cartItem);
+    cart.totalQuantity += quantity;
+    cart.totalPrice += cartItem.totalPrice;
+    user.cart = cart
+    await cart.save();
     await user.save()
 
 
-res.status(201).json({data:cart})
+    res.status(201).json({data:cart})
 }
 
     } catch (error) {
@@ -81,7 +92,47 @@ const getUserCart = async (req,res) => {
     }
 }
 
+const updateCart = async (req,res) => {
+    try {
+        const {productId, quantity} = req.body
+        const product = await productModel.findById(productId)
+        if(!product){
+            return res.status(404).json({message:"product not found"})
+        }
+        const userId = req.userId
+        const user = await userModel.findById(userId)
+        if(!user){
+            return res.status(404).json({message:"User not found"})
+        }
+        const cartId = req.params.id
+        const cart = await cartModel.findById(cartId)
+        if(!cart){
+            return res.status(404).json({message:"Cart not found"})
+        }
+        
+        const updateItem = cart.items.findIndex((product)=>product.toString())
+        console.log(updateItem);
+        console.log(cart.items[updateItem]);
+
+        cart.items[updateItem].quantity = quantity
+        cart.items[updateItem].totalPrice =  quantity * product.productPrice
+        
+        cart.totalQuantity += quantity;
+        cart.totalPrice += cart.items[updateItem].totalPrice;
+        user.cart = cart
+        // await cart.save();
+        // await user.save()
+
+
+res.status(200).json({data:cart})
+
+    } catch (error) {
+       res.status(500).json({message:error.message}) 
+    }
+}
+
 module.exports = {
     createCart,
-    getUserCart
+    getUserCart,
+    updateCart
 }

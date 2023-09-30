@@ -283,12 +283,12 @@ const forgotPassword = async (req, res)=>{
             }, process.env.JWT_SECRET, {expiresIn: '5m'})
             const subject = 'Link for Reset password'
             const link = `localhost:5174/api/changepassword/${isEmail._id}/${token}`
-            const message = `Forgot your Password? it's okay, kindly use this link ${link} to re-set your account password. Kindly note that this link will expire after 5(five) Minutes.`
+            const text = `Forgot your Password? it's okay, kindly use this link ${link} to re-set your account password. Kindly note that this link will expire after 5(five) Minutes.`
             // const html = generatePasswordEmail(link)
             sendEmail({
                 email,
                 subject,
-                message
+                text
             });
             res.status(200).json({
                 message: 'Email sent successfully, please check your Email for the link to reset your Password'

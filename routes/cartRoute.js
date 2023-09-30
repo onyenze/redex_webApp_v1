@@ -3,7 +3,8 @@ const express = require('express');
 
 const {
     createCart,
-    getUserCart
+    getUserCart,
+    updateCart
 } = require('../controllers/cartController')
 const {
     userAuth,
@@ -18,6 +19,9 @@ router.post('/cart/:id',userAuth, createCart)
 
 // route to get a user's cart
 router.get('/getCart/:id',userAuth, getUserCart)  
+
+// route to get a user's cart
+router.put('/update/:id',userAuth, updateCart) 
 
 
 
