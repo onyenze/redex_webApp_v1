@@ -9,6 +9,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: [true, 'productDescription is Required']
     },
+    topDemanding:{
+        type: Boolean,
+        default: false
+    },
     productType: {
         type: String,
         required: [true, 'productType is Required']

@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
     profilePicture:{
         type:String
     },
+    cart: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Cart',
+    },
     isVerified: {
         type: Boolean,
         default: false

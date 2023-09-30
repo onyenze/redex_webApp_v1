@@ -2,7 +2,8 @@ const express = require('express');
 
 
 const {
-    createCart
+    createCart,
+    getUserCart
 } = require('../controllers/cartController')
 const {
     userAuth,
@@ -14,6 +15,9 @@ const router = express.Router();
 
 // route to create a cart
 router.post('/cart/:id',userAuth, createCart)  
+
+// route to get a user's cart
+router.get('/getCart/:id',userAuth, getUserCart)  
 
 
 
