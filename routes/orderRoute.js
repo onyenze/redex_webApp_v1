@@ -2,7 +2,9 @@ const express = require('express');
 
 
 const {
-    createOrder
+    createOrder,
+    getAllUserOrders,
+    getOneUserOrder
 } = require('../controllers/orderController')
 const {
     userAuth,
@@ -14,6 +16,12 @@ const router = express.Router();
 
 // route to create an order
 router.post('/order',userAuth, createOrder)
+
+// route to get all of a user's order
+router.get('/orders',userAuth, getAllUserOrders)
+
+// route to get one of a user's order
+router.get('/oneorder',userAuth, getOneUserOrder)
 
 
 

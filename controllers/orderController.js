@@ -46,7 +46,9 @@ const createOrder = async (req, res) => {
 
         // Save the order to the database
         await order.save();
+        
         user.orders.push(order)
+        console.log(user.orders);
         // Clear the user's cart as the items have been ordered
         await cartModel.findByIdAndDelete(cart._id)
 
@@ -69,7 +71,7 @@ const getAllUserOrders = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
+        console.log(user);
         const userOrders = user.orders;
 
         return res.status(200).json({ data: userOrders });
@@ -79,7 +81,40 @@ const getAllUserOrders = async (req, res) => {
 };
 
 
+const getOneUserOrder = async (req, res) => {
+    try {
+        const userId = req.userId; 
+        const orderId = req.params.id; 
+
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the user has the specified order
+        const orderExists = user.orders.includes(orderId);
+
+        if (!orderExists) {
+            return res.status(404).json({ message: 'Order not found for this user' });
+        }
+
+        // Retrieve the order by its ID
+        const order = await orderModel.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        return res.status(200).json({ data: order });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 module.exports = {
     createOrder,
-    getAllUserOrders
+    getAllUserOrders,
+    getOneUserOrder
 }
