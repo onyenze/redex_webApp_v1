@@ -2,73 +2,79 @@ const cartModel = require('../models/cartModel');
 const productModel = require('../models/inventoryModel');
 const userModel = require('../models/userModel');
 
-const createCart = async (req,res)=>{
+const createCart = async (req, res, next) => {
     try {
-        
-    const userId = req.userId; 
-    const user = await userModel.findById(userId)
-        if(!user){
-            return res.status(404).send('User not found')
-        }
-    const productId = req.params.id
-    const product = await productModel.findById(productId)
-        if(!product){
-            return res.status(404).send('Product not found')
-        }
-    const quantity = 1; // The default quantity is One
+        const userId = req.userId;
+        const user = await userModel.findById(userId);
 
-const cartItem = {
-    product: product._id.toString(),
-    quantity: quantity,
-    price: product.productPrice,
-    totalPrice: quantity * product.productPrice,
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const productId = req.params.id;
+        const product = await productModel.findById(productId);
+
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const quantity = 1; // The default quantity is one
+
+        const cartItem = {
+            product: product._id.toString(),
+            quantity: quantity,
+            price: product.productPrice,
+            totalPrice: quantity * product.productPrice,
+        };
+
+        // Find the user's cart or create one if it doesn't exist
+        const cart = await cartModel.findOne({ user: userId }).exec();
+
+        if (!cart) {
+            const newCart = new cartModel({ user: userId, items: [] });
+
+            // Add the product to the cart
+            newCart.items.push(cartItem);
+            newCart.totalQuantity += quantity;
+            newCart.totalPrice += cartItem.totalPrice;
+
+            user.cart = newCart;
+            await newCart.save();
+            await user.save();
+
+            return res.status(201).json({ message: 'Cart created', data: newCart });
+        } else {
+            const updateItemIndex = cart.items.findIndex((item) => item.product.toString() === productId);
+
+            if (updateItemIndex !== -1) {
+                cart.items[updateItemIndex].quantity += 1;
+                cart.items[updateItemIndex].totalPrice = cart.items[updateItemIndex].quantity * product.productPrice;
+
+                cart.totalQuantity += 1;
+                cart.totalPrice += 1 * product.productPrice;
+
+                user.cart = cart;
+                await cart.save();
+                await user.save();
+
+                return res.status(200).json({ message: 'Product quantity updated', data: cart });
+            } else {
+                cart.items.push(cartItem);
+                cart.totalQuantity += quantity;
+                cart.totalPrice += cartItem.totalPrice;
+
+                user.cart = cart;
+                await cart.save();
+                await user.save();
+
+                return res.status(201).json({ message: 'Product added to cart', data: cart });
+            }
+        }
+    } catch (error) {
+        res.status(500).json({message:error.message}) 
+    }
 };
 
-// Find the user's cart or create one if it doesn't exist
-const cart = await cartModel.findOne({ user: userId }).exec();
-
-if (!cart) {
-    const newCart = new cartModel({ user: userId, items: [] });
-    // Add the product to the cart
-
-newCart.items.push(cartItem);
-newCart.totalQuantity += quantity;
-newCart.totalPrice += cartItem.totalPrice;
-    user.cart = newCart
-    await newCart.save();
-    await user.save()
-    res.status(201).json({data:newCart})
-}
-
-
-else {
-    const updateItem = cart.items.findIndex((product)=>product.toString())
-    if (updateItem){
-        cart.items[updateItem].quantity += 1
-        cart.items[updateItem].totalPrice =  quantity * product.productPrice
-        
-        cart.totalQuantity += 1;
-        cart.totalPrice += cart.items[updateItem].totalPrice;
-        user.cart = cart
-        // await cart.save();
-        // await user.save()
-
-    }
-    cart.items.push(cartItem);
-    cart.totalQuantity += quantity;
-    cart.totalPrice += cartItem.totalPrice;
-    user.cart = cart
-    await cart.save();
-    await user.save()
-
-
-    res.status(201).json({data:cart})
-}
-
-    } catch (error) {
-        res.status(500).json({message:error.message})
-    }
-}
 
 const getUserCart = async (req,res) => {
     try {
@@ -110,18 +116,16 @@ const updateCart = async (req,res) => {
             return res.status(404).json({message:"Cart not found"})
         }
         
-        const updateItem = cart.items.findIndex((product)=>product.toString())
-        console.log(updateItem);
-        console.log(cart.items[updateItem]);
-
+        const updateItem = cart.items.findIndex((item) => item.product.toString() === productId)
         cart.items[updateItem].quantity = quantity
         cart.items[updateItem].totalPrice =  quantity * product.productPrice
+
         
-        cart.totalQuantity += quantity;
-        cart.totalPrice += cart.items[updateItem].totalPrice;
+        cart.totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+        cart.totalPrice = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
         user.cart = cart
-        // await cart.save();
-        // await user.save()
+        await cart.save();
+        await user.save()
 
 
 res.status(200).json({data:cart})
@@ -131,8 +135,87 @@ res.status(200).json({data:cart})
     }
 }
 
+const removeCartItem = async (req, res) => {
+    try {
+        const {productId} = req.body; 
+        const userId = req.userId;
+
+        // Find the user's cart
+        const cart = await cartModel.findById(req.params.id);
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // Find the index of the item to remove
+        const itemIndex = cart.items.findIndex((item) => item.product.toString() === productId);
+
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: 'Item not found in the cart' });
+        }
+
+        // Get the removed item's quantity and price
+        const removedItem = cart.items[itemIndex];
+        const removedQuantity = removedItem.quantity;
+        const removedTotalPrice = removedItem.totalPrice;
+
+        // Remove the item from the cart
+        cart.items.splice(itemIndex, 1);
+
+        // Update total quantity and total price
+        cart.totalQuantity -= removedQuantity;
+        cart.totalPrice -= removedTotalPrice;
+
+        // Update the user's cart
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.cart = cart;
+        await cart.save();
+        await user.save();
+
+        return res.status(200).json({ message: 'Item removed from the cart', data: cart });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+const deleteCart = async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        // Find the user's cart
+        const cart = await cartModel.findById(req.params.id);
+
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found' });
+        }
+
+        // Remove the cart reference from the user
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.cart = null; // Remove the reference to the cart
+        await user.save();
+
+        return res.status(200).json({ message: 'Cart deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 module.exports = {
     createCart,
     getUserCart,
-    updateCart
+    updateCart,
+    removeCartItem,
+    deleteCart
 }
