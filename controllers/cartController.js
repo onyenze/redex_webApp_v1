@@ -207,7 +207,7 @@ const deleteCart = async (req, res) => {
         if (!cart) {
             return res.status(404).json({ message: 'Cart not found' });
         }
-
+        await cartModel.findByIdAndDelete(req.params.id)
         // Remove the cart reference from the user
         const user = await userModel.findById(userId);
 

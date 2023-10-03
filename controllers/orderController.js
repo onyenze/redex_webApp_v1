@@ -49,6 +49,7 @@ const createOrder = async (req, res) => {
         
         user.orders.push(order)
         console.log(user.orders);
+        await user.save()
         // Clear the user's cart as the items have been ordered
         await cartModel.findByIdAndDelete(cart._id)
 
@@ -112,6 +113,26 @@ const getOneUserOrder = async (req, res) => {
     }
 };
 
+const requestQuote = async (req,res) => {
+    try {
+        let result = null;
+
+          if (req.files) {
+            result= await cloudinary.uploader.upload(
+              req.files.eventImages.tempFilePath,{folder:"eventImages"},
+              (err, eventImages) => {
+                try {
+                  return eventImages;
+                } catch (err) {
+                  return err;
+                }
+              }
+            );
+          } 
+    } catch (error) {
+        res.status(500).json({message:error.message})
+    }
+}
 
 module.exports = {
     createOrder,
