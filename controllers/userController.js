@@ -495,26 +495,6 @@ const createAdmin = async (req, res)=>{
 
 
 
-// For Super Admin
-const allAdminUsers = async (req, res)=>{
-    try {
-        const adminUsers = await userModel.find({isAdmin: true})
-        if (adminUsers.length == 0) {
-            res.status(404).json({
-                message: 'No Admin Users'
-            })
-        } else {
-            res.status(200).json({
-                message: 'All Admin Users',
-                data: adminUsers
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
-};
 
 
 

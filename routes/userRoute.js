@@ -48,12 +48,6 @@ router.put('/updateuser',  userAuth, validateUser,updateUsers) // checked
 router.get('/allusers', allUsers)
 
 
-// Major Routes for SUPER ADMIN routes
-
-router.post('/createAdmin/:id', userAuth, isSuperAdminAuthorized, createAdmin);
-router.get('/allAdminUsers/:id', userAuth, isSuperAdminAuthorized, allAdminUsers);
-
-
 
 module.exports = router;
 
