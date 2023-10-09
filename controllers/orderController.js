@@ -113,26 +113,6 @@ const getOneUserOrder = async (req, res) => {
     }
 };
 
-const requestQuote = async (req,res) => {
-    try {
-        let result = null;
-
-          if (req.files) {
-            result= await cloudinary.uploader.upload(
-              req.files.eventImages.tempFilePath,{folder:"eventImages"},
-              (err, eventImages) => {
-                try {
-                  return eventImages;
-                } catch (err) {
-                  return err;
-                }
-              }
-            );
-          } 
-    } catch (error) {
-        res.status(500).json({message:error.message})
-    }
-}
 
 module.exports = {
     createOrder,

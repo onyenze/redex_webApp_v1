@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',
     }],
+    requestedQuotes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'BrandingRequest',
+    }],
     isVerified: {
         type: Boolean,
         default: false

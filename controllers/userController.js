@@ -535,7 +535,6 @@ module.exports = {
     addProfilePicture,
     getUserProfile,
     createAdmin,
-    allAdminUsers,
     allUsers,
 };
 // e choke

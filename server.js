@@ -19,6 +19,7 @@ const blog = require('./routes/blogRoute');
 const product = require("./routes/inventoryRoute")
 const cart = require("./routes/cartRoute")
 const order = require("./routes/orderRoute")
+const quote = require("./routes/quoteRoute")
 app.use(express.json());
 
 
@@ -33,6 +34,7 @@ app.use('/api', blog);
 app.use("/api", product)
 app.use("/api", cart)
 app.use("/api", order)
+app.use("/api", quote)
 
 
 
