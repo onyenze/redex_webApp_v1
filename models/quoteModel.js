@@ -24,7 +24,7 @@ const brandingRequestSchema = new mongoose.Schema({
         default: 'Pending Review',
         required: true,
     },
-    selctedQuantity: {
+    selectedQuantity: {
         type: Number,
         required: true,
     },
