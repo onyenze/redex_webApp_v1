@@ -9,6 +9,9 @@ const { userAuth } = require('../middlewares/authMiddleware');
 // Create a branding request
 router.post('/branding-request/:id', userAuth, createBrandingRequest);
 
+
+
+
 // Get one branding request
 router.get('/branding-requests/:id', userAuth, getOneBrandingRequest);
 
